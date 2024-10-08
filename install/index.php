@@ -3,16 +3,18 @@
 error_reporting(0); //Setting this to E_ALL showed that that cause of not redirecting were few blank lines added in some php files.
 
 $db_config_path = '../application/config/database.php';
-
+$error = 0;
 $assets_path = '../assets/images';
-
+if (version_compare(PHP_VERSION, '7.0.0', '<') || version_compare(PHP_VERSION, '8.0.0', '>=')) {
+    die('<p class="error">You need PHP version 7.x to run this application. Your PHP version: ' . PHP_VERSION . '</p>');
+}
 $module =  in_array('mod_rewrite', apache_get_modules());
 
 if($module == 1){?>
 
-
+<?php $error = 1; ?>
 <?php }else{?>
-
+	<?php $error = 0; ?>
 	<p class="error">Please enable mod_rewrite. <strong>Example</strong>:<br /><br /><code>a2enmod rewrite</code></p>
 
 <?php }
@@ -108,7 +110,7 @@ if($_POST) {
 
     <center><img src="../assets/images/login-logo.png" alt="Home" height="100"><h1>Installation</h1></center>
     <?php if(is_writable($db_config_path) && is_writable($assets_path) ){?>
-
+		<?php $error = 1; ?>
 		  <?php if(isset($message)) {echo '<p class="error">' . $message . '</p>';}?>
 
 		  <form id="install_form" method="post" action="<?php echo $_SERVER['PHP_SELF']; ?>">
@@ -118,11 +120,12 @@ if($_POST) {
           <label for="username">Username</label><input type="text" id="username" class="input_text" name="username" />
           <label for="password">Password</label><input type="password" id="password" class="input_text" name="password" />
           <label for="database">Database Name</label><input type="text" id="database" class="input_text" name="database" />
-          <input type="submit" value="Install" id="submit" />
+          <?php if($error == 1) { ?><input type="submit" value="Install" id="submit" /> <?php } ?>
         </fieldset>
 		  </form>
 
 	  <?php } else { ?>
+		<?php $error = 0; ?>
       <p class="error">Please make sure the application/config/database.php file writable. <strong>Example</strong>:<br /><br /><code>chmod 777 application/config/database.php</code></p>
 	  <p class="error">Please make sure the assets/images folder writable. <strong>Example</strong>:<br /><br /><code>chmod 777 assets/images</code></p>
 	  <?php } ?> 
