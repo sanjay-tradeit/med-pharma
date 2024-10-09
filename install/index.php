@@ -4,9 +4,9 @@ error_reporting(0); //Setting this to E_ALL showed that that cause of not redire
 $db_config_path = '../application/config/database.php';
 $error = 0;
 $assets_path = '../assets/images';
-// if (version_compare(PHP_VERSION, '7.0.0', '<') || version_compare(PHP_VERSION, '8.0.0', '>')) {
-//     die('<p class="error">You need PHP version 7.x to run this application. Your PHP version: ' . PHP_VERSION . '</p>');
-// }
+if (version_compare(PHP_VERSION, '7.0.0', '<') || version_compare(PHP_VERSION, '8.0.0', '>')) {
+    die('<p class="error">You need PHP version 7.x to run this application. Your PHP version: ' . PHP_VERSION . '</p>');
+}
 $module =  in_array('mod_rewrite', apache_get_modules());
 
 if($module == 1){?>
