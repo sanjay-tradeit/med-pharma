@@ -1,13 +1,12 @@
 <?php
-
 error_reporting(0); //Setting this to E_ALL showed that that cause of not redirecting were few blank lines added in some php files.
 
 $db_config_path = '../application/config/database.php';
 $error = 0;
 $assets_path = '../assets/images';
-if (version_compare(PHP_VERSION, '7.0.0', '<') || version_compare(PHP_VERSION, '8.0.0', '>=')) {
-    die('<p class="error">You need PHP version 7.x to run this application. Your PHP version: ' . PHP_VERSION . '</p>');
-}
+// if (version_compare(PHP_VERSION, '7.0.0', '<') || version_compare(PHP_VERSION, '8.0.0', '>')) {
+//     die('<p class="error">You need PHP version 7.x to run this application. Your PHP version: ' . PHP_VERSION . '</p>');
+// }
 $module =  in_array('mod_rewrite', apache_get_modules());
 
 if($module == 1){?>
@@ -120,7 +119,7 @@ if($_POST) {
           <label for="username">Username</label><input type="text" id="username" class="input_text" name="username" />
           <label for="password">Password</label><input type="password" id="password" class="input_text" name="password" />
           <label for="database">Database Name</label><input type="text" id="database" class="input_text" name="database" />
-          <?php if($error == 1) { ?><input type="submit" value="Install" id="submit" /> <?php } ?>
+          <?php if($error == 1) { ?><input type="submit" value="Install" name="SubmitButton" id="submit" /> <?php } ?>
         </fieldset>
 		  </form>
 
@@ -130,8 +129,62 @@ if($_POST) {
 	  <p class="error">Please make sure the assets/images folder writable. <strong>Example</strong>:<br /><br /><code>chmod 777 assets/images</code></p>
 	  <?php } ?> 
 	 
+	  <?php 
+	  $cloneDirectory = dirname(__FILE__);
+	  function createDatabase($dbHost, $dbUser, $dbPass, $dbName)
+	  {
+		  $connection = new mysqli($dbHost, $dbUser, $dbPass);
+		  if ($connection->connect_error) {
+			  return "Connection failed: " . $connection->connect_error;
+		  }
+		  $sql = "CREATE DATABASE IF NOT EXISTS $dbName";
+		  if ($connection->query($sql) === TRUE) {
+			  return "Database $dbName created successfully.";
+		  } else {
+			  return "Error creating database: " . $connection->error;
+		  }
+	  }
 	  
-
+	  function importDatabase($dbHost, $dbUser, $dbPass, $dbName, $sqlFile)
+	  {
+		  $connection = mysqli_connect($dbHost, $dbUser, $dbPass, $dbName);
+		  if (!$connection) {
+			  die("Connection failed: " . mysqli_connect_error());
+		  }
+		  $handle = fopen($sqlFile, "r+");
+		  if ($handle) {
+			  $contents = fread($handle, filesize($sqlFile));
+			  fclose($handle);
+			  $sqlQueries = explode(";", $contents);
+			  
+			  foreach ($sqlQueries as $query) {
+				  $query = trim($query);
+				  if (!empty($query)) {
+					  $result = mysqli_query($connection, $query);
+	
+				  }
+			  }
+		  } else {
+			  echo "Error opening the file.";
+		  }
+		  mysqli_close($connection);
+	  }
+	  
+	  if(isset($_POST['SubmitButton'])){
+	  $dbHost = $_POST['hostname'];
+	  $dbUser = $_POST['username'];
+	  $dbPass = $_POST['password'];
+	  $dbName = $_POST['database'];
+ 
+	  $newcloneDirectory =  str_replace("install","",$cloneDirectory);
+	  $sqlFile = $newcloneDirectory . "dump\med_pharma.sql";
+	  $dbCreationOutput = createDatabase($dbHost, $dbUser, $dbPass, $dbName);
+	  echo "<pre>Database Creation Output:\n$dbCreationOutput</pre>";
+	  
+	  $importOutput = importDatabase($dbHost, $dbUser, $dbPass, $dbName, $sqlFile);
+	  echo "<pre>Database Import Output:\n$importOutput</pre>";
+	  }
+ ?>
 	  
 
 	</body>
