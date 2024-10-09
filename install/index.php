@@ -177,7 +177,7 @@ if($_POST) {
 	  $dbName = $_POST['database'];
  
 	  $newcloneDirectory =  str_replace("install","",$cloneDirectory);
-	  $sqlFile = $newcloneDirectory . "dump\med_pharma.sql";
+	  $sqlFile = $newcloneDirectory . "dump/med_pharma.sql";
 	  $dbCreationOutput = createDatabase($dbHost, $dbUser, $dbPass, $dbName);
 	  echo "<pre>Database Creation Output:\n$dbCreationOutput</pre>";
 	  
